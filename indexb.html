@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مشروع ProjV - نظام إدارة الفواتير والتراخيص</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            padding: 40px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4a00e0 0%, #8e2de2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin: 5px;
+            font-size: 0.9em;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .info-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            border-right: 4px solid #764ba2;
+            transition: transform 0.3s;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .info-card h3 {
+            color: #764ba2;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .info-card .value {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            color: #4a00e0;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #764ba2;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title .icon {
+            font-size: 1.2em;
+        }
+
+        .tree {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+
+        .tree-item {
+            padding: 3px 0;
+            color: #333;
+        }
+
+        .tree-item.folder {
+            color: #4a00e0;
+            font-weight: bold;
+        }
+
+        .tree-item.file {
+            color: #555;
+            padding-right: 20px;
+        }
+
+        .tree-item .icon-folder {
+            color: #f0c040;
+        }
+
+        .tree-item .icon-file {
+            color: #6c757d;
+        }
+
+        .file-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .file-item {
+            background: white;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        .file-item:hover {
+            background: #f0f0ff;
+            border-color: #764ba2;
+            transform: scale(1.02);
+        }
+
+        .file-item .ext {
+            background: #764ba2;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .file-item .ext.pas {
+            background: #28a745;
+        }
+
+        .file-item .ext.dpr {
+            background: #17a2b8;
+        }
+
+        .file-item .ext.dproj {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .file-item .ext.res {
+            background: #dc3545;
+        }
+
+        .file-item .ext.ico {
+            background: #6f42c1;
+        }
+
+        .file-item .ext.rc {
+            background: #fd7e14;
+        }
+
+        .properties-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .properties-table th {
+            background: #764ba2;
+            color: white;
+            padding: 12px 15px;
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .properties-table td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .properties-table tr:hover td {
+            background: #f8f9fa;
+        }
+
+        .properties-table .label {
+            font-weight: 600;
+            color: #4a00e0;
+            width: 30%;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 12px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            direction: ltr;
+            text-align: left;
+            margin: 15px 0;
+        }
+
+        .code-block .comment {
+            color: #6a9955;
+        }
+
+        .code-block .keyword {
+            color: #569cd6;
+        }
+
+        .code-block .string {
+            color: #ce9178;
+        }
+
+        .code-block .func {
+            color: #dcdcaa;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            margin: 2px;
+        }
+
+        .tag.blue {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .tag.green {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .tag.red {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .tag.purple {
+            background: #ede9fe;
+            color: #5b21b6;
+        }
+
+        .tag.orange {
+            background: #fed7aa;
+            color: #9a3412;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+            color: #6c757d;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            .header h1 {
+                font-size: 1.8em;
+            }
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🚀 ProjV</h1>
+            <p>نظام إدارة الفواتير والتراخيص - نسخة محسنة ومطورة</p>
+            <div style="margin-top: 15px;">
+                <span class="badge">📦 Delphi VCL</span>
+                <span class="badge">🔒 نظام تراخيص متكامل</span>
+                <span class="badge">📊 إدارة فواتير</span>
+                <span class="badge">🛡️ أمان متقدم</span>
+            </div>
+        </div>
+
+        <!-- Quick Info -->
+        <div class="info-grid">
+            <div class="info-card">
+                <h3>📁 اسم المشروع</h3>
+                <div class="value">ProjV</div>
+            </div>
+            <div class="info-card">
+                <h3>🆔 GUID</h3>
+                <div class="value" style="font-size: 0.9em;">{8F4A2B1C-3D5E-4F6A-8B7C-9D0E1F2A3B4C}</div>
+            </div>
+            <div class="info-card">
+                <h3>📌 الإصدار</h3>
+                <div class="value">1.0.0.0</div>
+            </div>
+            <div class="info-card">
+                <h3>🛠️ الإطار</h3>
+                <div class="value">Delphi VCL 19.0</div>
+            </div>
+            <div class="info-card">
+                <h3>🎯 المنصة</h3>
+                <div class="value">Win32</div>
+            </div>
+            <div class="info-card">
+                <h3>📦 نوع التطبيق</h3>
+                <div class="value">Application</div>
+            </div>
+        </div>
+
+        <!-- Project Structure -->
+        <div class="section">
+            <div class="section-title">
+                <span class="icon">📂</span>
+                هيكل المشروع
+            </div>
+            <div class="tree">
+                <div class="tree-item folder">📁 ProjV/</div>
+                <div class="tree-item folder" style="padding-right: 20px;">├── 📁 src/</div>
+                <div class="tree-item folder" style="padding-right: 40px;">│   ├── 📁 Forms/</div>
+                <div class="tree-item file" style="padding-right: 60px;">│   │   ├── 📄 passUnit.pas <span class="tag blue">passForm</span></div>
+                <div class="tree-item file" style="padding-right: 60px;">│   │   ├── 📄 mainUnit.pas <span class="tag blue">mainForm</span></div>
+                <div class="tree-item file" style="padding-right: 60px;">│   │   ├── 📄 customerUnit.pas <span class="tag blue">customerForm</span></div>
+                <div class="tree-item file" style="padding-right: 60px;">│   │   ├── 📄 invoiceUnit.pas <span class="tag blue">invoiceForm</span></div>
+                <div class="tree-item file" style="padding-right: 60px;">│   │   ├── 📄 invoiceitemUnit.pas <span class="tag blue">invoiceitemForm</span></div>
+                <div class="tree-item file" style="padding-right: 60px;">│   │   ├── 📄 uSplash.pas <span class="tag blue">SplashForm</span></div>
+                <div class="tree-item file" style="padding-right: 60px;">│   │   └── 📄 helpUnit.pas <span class="tag blue">helpForm</span></div>
+                <div class="tree-item folder" style="padding-right: 40px;">│   ├── 📁 Data/</div>
+                <div class="tree-item file" style="padding-right: 60px;">│   │   └── 📄 MainDataModule_Unit.pas <span class="tag purple">TDataModule</span></div>
+                <div class="tree-item folder" style="padding-right: 40px;">│   ├── 📁 License/</div>
+                <div class="tree-item file" style="padding-right: 60px;">│   │   ├── 📄 DeveloperApprovalUnit.pas</div>
+                <div class="tree-item file" style="padding-right: 60px;">│   │   ├── 📄 LicenseGeneratorunit.pas <span class="tag blue">LicenseGeneratorForm</span></div>
+                <div class="tree-item file" style="padding-right: 60px;">│   │   ├── 📄 LicenseActivationunit.pas <span class="tag blue">LicenseActivationForm</span></div>
+                <div class="tree-item file" style="padding-right: 60px;">│   │   └── 📄 LicenseManager.pas</div>
+                <div class="tree-item folder" style="padding-right: 40px;">│   └── 📁 Utils/</div>
+                <div class="tree-item file" style="padding-right: 60px;">│       └── 📄 AppLogger.pas</div>
+                <div class="tree-item file" style="padding-right: 20px;">├── 📄 ProjV.dpr <span class="tag green">Main Source</span></div>
+                <div class="tree-item file" style="padding-right: 20px;">├── 📄 ProjV.dproj <span class="tag orange">Project File</span></div>
+                <div class="tree-item file" style="padding-right: 20px;">├── 📄 ProjV.res <span class="tag red">Resources</span></div>
+                <div class="tree-item file" style="padding-right: 20px;">├── 📄 ProjV.rc <span class="tag purple">RC File</span></div>
+                <div class="tree-item file" style="padding-right: 20px;">└── 🖼️ ProjV.ico <span class="tag blue">Icon</span></div>
+            </div>
+        </div>
+
+        <!-- Files Details -->
+        <div class="section">
+            <div class="section-title">
+                <span class="icon">📄</span>
+                ملفات المشروع
+            </div>
+            <div class="file-list">
+                <div class="file-item"><span class="ext pas">.pas</span> passUnit.pas</div>
+                <div class="file-item"><span class="ext pas">.pas</span> mainUnit.pas</div>
+                <div class="file-item"><span class="ext pas">.pas</span> customerUnit.pas</div>
+                <div class="file-item"><span class="ext pas">.pas</span> invoiceUnit.pas</div>
+                <div class="file-item"><span class="ext pas">.pas</span> invoiceitemUnit.pas</div>
+                <div class="file-item"><span class="ext pas">.pas</span> uSplash.pas</div>
+                <div class="file-item"><span class="ext pas">.pas</span> helpUnit.pas</div>
+                <div class="file-item"><span class="ext pas">.pas</span> MainDataModule_Unit.pas</div>
+                <div class="file-item"><span class="ext pas">.pas</span> DeveloperApprovalUnit.pas</div>
+                <div class="file-item"><span class="ext pas">.pas</span> LicenseGeneratorunit.pas</div>
+                <div class="file-item"><span class="ext pas">.pas</span> LicenseActivationunit.pas</div>
+                <div class="file-item"><span class="ext pas">.pas</span> LicenseManager.pas</div>
+                <div class="file-item"><span class="ext pas">.pas</span> AppLogger.pas</div>
+                <div class="file-item"><span class="ext dpr">.dpr</span> ProjV.dpr</div>
+                <div class="file-item"><span class="ext dproj">.dproj</span> ProjV.dproj</div>
+                <div class="file-item"><span class="ext res">.res</span> ProjV.res</div>
+                <div class="file-item"><span class="ext rc">.rc</span> ProjV.rc</div>
+                <div class="file-item"><span class="ext ico">.ico</span> ProjV.ico</div>
+            </div>
+        </div>
+
+        <!-- Configuration -->
+        <div class="section">
+            <div class="section-title">
+                <span class="icon">⚙️</span>
+                إعدادات البناء
+            </div>
+            <table class="properties-table">
+                <thead>
+                    <tr>
+                        <th>الإعداد</th>
+                        <th>القيمة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="label">Debug - Optimize</td>
+                        <td>false</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Debug - Stack Frames</td>
+                        <td>true</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Debug - Debug Info</td>
+                        <td>true</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Release - Optimize</td>
+                        <td>true</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Release - Stack Frames</td>
+                        <td>false</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Release - Debug Info</td>
+                        <td>false</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Unit Search Path</td>
+                        <td>src\Forms; src\Data; src\License; src\Security; src\Utils</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Namespace</td>
+                        <td>System; Xml; Data; Datasnap; Web; Soap; Winapi; System.Classes; Vcl; Vcl.Imaging; Vcl.Touch; Vcl.Samples; Vcl.Shell</td>
+                    </tr>
+                    <tr>
+                        <td class="label">DCU Output</td>
+                        <td>.\$(Platform)\$(Config)</td>
+                    </tr>
+                    <tr>
+                        <td class="label">EXE Output</td>
+                        <td>.\$(Platform)\$(Config)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Version Info -->
+        <div class="section">
+            <div class="section-title">
+                <span class="icon">ℹ️</span>
+                معلومات الإصدار
+            </div>
+            <table class="properties-table">
+                <thead>
+                    <tr>
+                        <th>الخاصية</th>
+                        <th>القيمة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="label">Include Version Info</td>
+                        <td>True</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Auto Increment Build</td>
+                        <td>False</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Major Version</td>
+                        <td>1</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Minor Version</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Revision</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Build</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Product Name</td>
+                        <td>Proj License Manager</td>
+                    </tr>
+                    <tr>
+                        <td class="label">File Description</td>
+                        <td>نظام إدارة الفواتير والتراخيص</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Internal Name</td>
+                        <td>ProjV</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Original Filename</td>
+                        <td>ProjV.exe</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Features -->
+        <div class="section">
+            <div class="section-title">
+                <span class="icon">✨</span>
+                المميزات
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                <span class="tag blue">📋 إدارة العملاء</span>
+                <span class="tag green">📄 إدارة الفواتير</span>
+                <span class="tag purple">🔑 نظام تراخيص</span>
+                <span class="tag orange">🛡️ أمان متقدم</span>
+                <span class="tag red">📊 تقارير</span>
+                <span class="tag blue">💾 قاعدة بيانات</span>
+                <span class="tag green">🔒 تشفير</span>
+                <span class="tag purple">📝 تسجيل الأحداث</span>
+                <span class="tag orange">🔄 تحديثات</span>
+                <span class="tag red">🎨 واجهة عربية</span>
+            </div>
+        </div>
+
+        <!-- Code Preview -->
+        <div class="section">
+            <div class="section-title">
+                <span class="icon">💻</span>
+                نموذج من الكود
+            </div>
+            <div class="code-block">
+                <span class="keyword">program</span> ProjV;<br>
+                <br>
+                <span class="keyword">uses</span><br>
+                &nbsp;&nbsp;Vcl.Forms,<br>
+                &nbsp;&nbsp;Vcl.Dialogs,<br>
+                &nbsp;&nbsp;System.SysUtils,<br>
+                &nbsp;&nbsp;System.Classes,<br>
+                &nbsp;&nbsp;<span class="comment">// Forms</span><br>
+                &nbsp;&nbsp;uSplash <span class="keyword">in</span> <span class="string">'src/Forms/SplashForm.pas'</span>,<br>
+                &nbsp;&nbsp;passUnit <span class="keyword">in</span> <span class="string">'passUnit.pas'</span> {passForm},<br>
+                &nbsp;&nbsp;mainUnit <span class="keyword">in</span> <span class="string">'mainUnit.pas'</span> {mainForm},<br>
+                &nbsp;&nbsp;<span class="comment">// License Management</span><br>
+                &nbsp;&nbsp;LicenseManager <span class="keyword">in</span> <span class="string">'LicenseManager.pas'</span>,<br>
+                &nbsp;&nbsp;AppLogger <span class="keyword">in</span> <span class="string">'AppLogger.pas'</span>;<br>
+                <br>
+                <span class="keyword">var</span><br>
+                &nbsp;&nbsp;LicenseManager: TLicenseManager;<br>
+                &nbsp;&nbsp;AppLogger: TAppLogger;<br>
+                <br>
+                <span class="keyword">begin</span><br>
+                &nbsp;&nbsp;<span class="keyword">try</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;Application.Initialize;<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;Application.MainFormOnTaskbar := True;<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;Application.Title := <span class="string">'برنامج إدارة الفواتير'</span>;<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;InitializeApplication;<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;Application.Run;<br>
+                &nbsp;&nbsp;<span class="keyword">except</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">on</span> E: Exception <span class="keyword">do</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ShowMessage(<span class="string">'خطأ: '</span> + E.Message);<br>
+                &nbsp;&nbsp;<span class="keyword">end</span>;<br>
+                <span class="keyword">end</span>.
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>© 2026 ProjV - نظام إدارة الفواتير والتراخيص</p>
+            <p style="font-size: 0.9em; margin-top: 5px; color: #999;">
+                تم تطويره باستخدام 🚀 Delphi VCL | جميع الحقوق محفوظة
+            </p>
+        </div>
+    </div>
+</body>
+</html>
